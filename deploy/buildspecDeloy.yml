@@ -1,0 +1,17 @@
+version: 0.2
+
+phases: 
+    pre_build:
+        commands:
+             - aws ecr get-login-passwor --region ap-south-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+             - aws ecr create-repository --repository-name $ECR_REPO_NAME || true
+    build:
+        commands:
+            - docker build -t containerized-lambda .
+            - docker tag containerized-lambda $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME:containerized-lambda-$CODEBUILD_BUILD_NUMBER
+            - docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME:containerized-lambda-$CODEBUILD_BUILD_NUMBER
+            - LAMBDA_IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME:containerized-lambda-$CODEBUILD_BUILD_NUMBER
+
+env:
+    exported-variables:
+        - LAMBDA_IMAGE_URI
