@@ -1,0 +1,16 @@
+version: 0.2
+
+env:
+    git-credential-helper: yes
+  
+phases: 
+    pre_build:
+        commands:
+             - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+    build:
+        commands:
+            - deploy/codebuild-git-wrapper.sh https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/LambdaDeployDemo master
+            - uname -a
+            - set -e
+            - chmod +x ./deploy/deploy.sh
+            - ./deploy/deploy.sh
