@@ -1,0 +1,26 @@
+Parameters:
+
+    LambdaRoleArn:
+        Type: String 
+        Default: "YOUR_IAM_ROLE"
+
+    LambdaImageUri:
+        Type: String 
+        Default: "ECR_Uri"
+        
+    Environment:
+        Type: String 
+        Default: "dev"
+
+Resources:
+    ContainerizedLambda:
+        Type: AWS::Lambda::Function 
+        Properties: 
+            Code:
+                ImageUri: !Ref LambdaImageUri
+            Description: !Sub '${Environment} lambda function to perform metadata engineering' 
+            FunctionName: !Sub 'containerized-lambda-metadata-nodejs-${Environment}'
+            MemorySize: 3000 
+            PackageType: "Image" 
+            Role: !Ref LambdaRoleArn 
+            Timeout: 900
