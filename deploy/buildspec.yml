@@ -1,0 +1,31 @@
+version: 0.2
+
+env:
+    git-credential-helper: yes
+    exported-variables:
+        - DEVBUILD_BUILD_NUMBER
+  
+phases: 
+    pre_build:
+        commands:
+             - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+             - aws ecr create-repository --repository-name $ECR_REPO_NAME || true
+    build:
+        commands:
+            - deploy/codebuild-git-wrapper.sh https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/LambdaDeployDemo master
+            - uname -a
+            - set -e
+            - chmod +x ./deploy/build.sh
+            - ./deploy/build.sh
+            - DEVBUILD_BUILD_NUMBER=$CODEBUILD_BUILD_NUMBER
+            #- docker build -t containerized-lambda .
+            #- docker tag containerized-lambda $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME:containerized-lambda-$CODEBUILD_BUILD_NUMBER
+            #- docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME:containerized-lambda-$CODEBUILD_BUILD_NUMBER
+            #- LAMBDA_IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME:containerized-lambda-$CODEBUILD_BUILD_NUMBER
+
+    post_build:
+        commands:
+            - uname -a
+            - set -e
+            - chmod +x ./deploy/deploy.sh
+            - ./deploy/deploy.sh
