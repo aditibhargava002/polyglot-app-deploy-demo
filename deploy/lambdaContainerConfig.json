@@ -1,0 +1,5 @@
+{
+"Properties": {
+        "LambdaRoleArn": "arn:aws:iam::175947708553:role/LambdaContainerizedRole"
+    }
+}
